@@ -1,7 +1,6 @@
 package net.ximatai.muyun.workflow.controller;
 
 import io.quarkus.runtime.Startup;
-import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -159,9 +158,10 @@ public class WorkflowTaskController extends ScaffoldForPlatform
     ) {
         String userId = getUser().getId();
 
+        // 使用 av_ 前缀表示 ANY 操作符查询（数组包含）
         Map<String, Object> filter = Map.of(
             "id_assignee", userId,
-            "dict_task_status", List.of("completed", "rejected")
+            "av_dict_task_status", new String[]{"completed", "rejected"}
         );
         return this.view(page, size != null ? Long.valueOf(size) : null, null, null, filter, this.queryGroup());
     }

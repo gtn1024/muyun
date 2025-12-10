@@ -1,8 +1,8 @@
 package net.ximatai.muyun.workflow.controller;
 
 import io.quarkus.runtime.Startup;
-import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.Path;
 import net.ximatai.muyun.ability.IReferableAbility;
 import net.ximatai.muyun.ability.IReferenceAbility;
 import net.ximatai.muyun.ability.curd.std.IQueryAbility;
@@ -11,14 +11,24 @@ import net.ximatai.muyun.database.core.builder.TableWrapper;
 import net.ximatai.muyun.model.QueryItem;
 import net.ximatai.muyun.model.ReferenceInfo;
 import net.ximatai.muyun.platform.ScaffoldForPlatform;
+import net.ximatai.muyun.platform.ability.IModuleRegisterAbility;
+import net.ximatai.muyun.platform.controller.ModuleController;
 import net.ximatai.muyun.platform.controller.UserInfoController;
+import net.ximatai.muyun.platform.model.ModuleConfig;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import java.util.List;
 
+import static net.ximatai.muyun.platform.PlatformConst.BASE_PATH;
+import static net.ximatai.muyun.workflow.controller.WorkflowHistoryController.MODULE_ALIAS;
+
 @Startup
-@ApplicationScoped
+@Tag(description = "工作流历史")
+@Path(BASE_PATH + "/" + MODULE_ALIAS)
 public class WorkflowHistoryController extends ScaffoldForPlatform
-    implements IReferableAbility, IReferenceAbility, IQueryAbility {
+    implements IReferableAbility, IReferenceAbility, IQueryAbility, IModuleRegisterAbility {
+
+    public final static String MODULE_ALIAS = "workflow_history";
 
     @Inject
     WorkflowInstanceController workflowInstanceController;
@@ -28,6 +38,9 @@ public class WorkflowHistoryController extends ScaffoldForPlatform
 
     @Inject
     UserInfoController userInfoController;
+
+    @Inject
+    ModuleController moduleController;
 
     @Override
     public String getMainTable() {
@@ -68,5 +81,18 @@ public class WorkflowHistoryController extends ScaffoldForPlatform
             userInfoController.toReferenceInfo("id_operator")
                 .add("v_name", "v_operator_name")
         );
+    }
+
+    @Override
+    public ModuleConfig getModuleConfig() {
+        return ModuleConfig.ofName("流程历史")
+            .setAlias(MODULE_ALIAS)
+            .setTable(getMainTable())
+            .setUrl("platform/workflow/history/index");
+    }
+
+    @Override
+    public ModuleController getModuleController() {
+        return moduleController;
     }
 }
